@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Class {
+  id       Int       @id @default(autoincrement())
+  name     String
+  sections Section[]
+  students Student[]
+  subjects Subject[]
+}
+
+model Section {
+  id       Int       @id @default(autoincrement())
+  name     String
+  class    Class     @relation(fields: [classId], references: [id])
+  classId  Int
+  students Student[]
+}
+
+model Student {
+  id                  Int             @id @default(autoincrement())
+  username            String          @unique
+  password            String
+  firstName           String
+  lastName            String
+  genderId            Int? // Foreign key to MasterDropdown
+  gender              MasterDropdown? @relation(fields: [genderId], references: [id]) // Relation to MasterDropdown
+  fatherName          String?
+  motherName          String?
+  fatherOccupation    String?
+  motherOccupation    String?
+  mobileNumber        String?
+  motherMobileNumber  String?
+  fatherEmail         String?
+  address             String?
+  isTransportRequired Boolean?
+  class               Class           @relation(fields: [classId], references: [id])
+  classId             Int
+  section             Section         @relation(fields: [sectionId], references: [id])
+  sectionId           Int
+  feeDetails          FeeDetails?
+}
+
+model FeeDetails {
+  id              Int     @id @default(autoincrement())
+  student         Student @relation(fields: [studentId], references: [id])
+  studentId       Int     @unique
+  totalFee        Float
+  discountAmount  Float
+  totalTerms      Int
+  remainingAmount Float
+  terms           Term[]
+}
+
+model Term {
+  id         Int        @id @default(autoincrement())
+  feeDetail  FeeDetails @relation(fields: [feeId], references: [id])
+  feeId      Int
+  termNumber Int
+  amount     Float
+  dueDate    DateTime
+  isPaid     Boolean
+}
+
+model Subject {
+  id        Int      @id @default(autoincrement())
+  name      String
+  code      String? // Optional subject code
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MasterDropdown {
+  id                 Int       @id @default(autoincrement())
+  type               String
+  value              String
+  students           Student[] // Backward relation to Student
+  genderStaff        Staff[]   @relation("StaffGender")
+  qualificationStaff Staff[]   @relation("StaffQualification")
+  departmentStaff    Staff[]   @relation("StaffDepartment")
+  designationStaff   Staff[]   @relation("StaffDesignation")
+  staffTypeStaff     Staff[]   @relation("StaffType")
+}
+
+model Staff {
+  id                  Int             @id @default(autoincrement())
+  firstName           String
+  lastName            String
+  genderId            Int?
+  gender              MasterDropdown? @relation("StaffGender", fields: [genderId], references: [id])
+  qualificationId     Int?
+  qualification       MasterDropdown? @relation("StaffQualification", fields: [qualificationId], references: [id])
+  departmentId        Int?
+  department          MasterDropdown? @relation("StaffDepartment", fields: [departmentId], references: [id])
+  designationId       Int?
+  designation         MasterDropdown? @relation("StaffDesignation", fields: [designationId], references: [id])
+  staffTypeId         Int?
+  staffType           MasterDropdown? @relation("StaffType", fields: [staffTypeId], references: [id])
+  experience          String?
+  mobileNumber        String?
+  email               String?         @unique
+  username            String          @unique
+  password            String
+  salary              Float?
+  isActive            Boolean         @default(true)
+  isTransportRequired Boolean?        @default(false)
+  timePeriods         TimePeriod[]    @relation("StaffTimePeriods")
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  TimePeriod          TimePeriod[]
+}
+
+model TimePeriod {
+  id              Int      @id @default(autoincrement())
+  periodName      String
+  subject         String
+  startDate       DateTime
+  endDate         DateTime
+  startTime       String // Format: "HH:MM"
+  endTime         String // Format: "HH:MM"
+  assignedTeacher Staff    @relation(fields: [teacherId], references: [id])
+  teacherId       Int
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  staff           Staff[]  @relation("StaffTimePeriods")
+}
+
+model Exams {
+  id                 Int       @id @default(autoincrement())
+  examName           String   
+  remarks            String
+}
