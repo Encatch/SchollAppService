@@ -1,37 +1,38 @@
 const timePeriodService = require('../../services/master/timePeriodService');
-
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 // Create a new time period
 exports.createTimePeriod = async (req, res) => {
   try {
-    const { periodName, subject, startDate, endDate, startTime, endTime, teacherId, isActive } = req.body;
+    // const { periodName, subject, startDate, endDate, startTime, endTime, teacherId, isActive } = req.body;
     
-    // Validation
-    if (!periodName || !subject || !startDate || !endDate || !startTime || !endTime || !teacherId) {
-      return res.status(400).json({ 
-        message: 'periodName, subject, startDate, endDate, startTime, endTime, and teacherId are required' 
-      });
-    }
+    // // Validation
+    // if (!periodName || !subject || !startDate || !endDate || !startTime || !endTime || !teacherId) {
+    //   return res.status(400).json({ 
+    //     message: 'periodName, subject, startDate, endDate, startTime, endTime, and teacherId are required' 
+    //   });
+    // }
 
-    // Validate time format (HH:MM)
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-      return res.status(400).json({ 
-        message: 'Time format should be HH:MM (24-hour format)' 
-      });
-    }
+    // // Validate time format (HH:MM)
+    // const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    // if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+    //   return res.status(400).json({ 
+    //     message: 'Time format should be HH:MM (24-hour format)' 
+    //   });
+    // }
 
-    const timePeriodData = {
-      periodName,
-      subject,
-      startDate,
-      endDate,
-      startTime,
-      endTime,
-      teacherId,
-      isActive
-    };
+    // const timePeriodData = {
+    //   periodName,
+    //   subject,
+    //   startDate,
+    //   endDate,
+    //   startTime,
+    //   endTime,
+    //   teacherId,
+    //   isActive
+    // };
 
-    const result = await timePeriodService.createTimePeriod(timePeriodData);
+    const result = await timePeriodService.createTimePeriod(req, res);
     res.status(201).json({
       message: 'Time period created successfully',
       data: result
@@ -41,6 +42,34 @@ exports.createTimePeriod = async (req, res) => {
     res.status(500).json({ 
       message: error.message || 'Server error while creating time period' 
     });
+  }
+};
+
+exports.getTimePeriodsByClassAndSection = async (req, res) => {
+  try {
+    const { classId, sectionId } = req.query;
+
+    if (!classId || !sectionId) {
+      return res.status(400).json({ error: "classId and sectionId are required" });
+    }
+
+    const timePeriods = await prisma.timePeriod.findMany({
+      where: {
+          classId: Number(classId),
+          sectionId: Number(sectionId),
+      },
+      include: {
+        subject: true,
+        class: true,
+        section: true,
+        assignedTeacher: true,
+      },
+    });
+
+    res.json(timePeriods);
+  } catch (error) {
+    console.error("Error fetching time periods:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -98,27 +127,27 @@ exports.getTimePeriodById = async (req, res) => {
 // Update time period
 exports.updateTimePeriod = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
+   // const { id } = req.params;
+    //const updateData = req.body;
     
-    if (!id || isNaN(id)) {
-      return res.status(400).json({ message: 'Valid time period ID is required' });
-    }
+    // if (!id || isNaN(id)) {
+    //   return res.status(400).json({ message: 'Valid time period ID is required' });
+    // }
 
-    // Validate time format if provided
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if (updateData.startTime && !timeRegex.test(updateData.startTime)) {
-      return res.status(400).json({ 
-        message: 'Start time format should be HH:MM (24-hour format)' 
-      });
-    }
-    if (updateData.endTime && !timeRegex.test(updateData.endTime)) {
-      return res.status(400).json({ 
-        message: 'End time format should be HH:MM (24-hour format)' 
-      });
-    }
+    // // Validate time format if provided
+    // const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    // if (updateData.startTime && !timeRegex.test(updateData.startTime)) {
+    //   return res.status(400).json({ 
+    //     message: 'Start time format should be HH:MM (24-hour format)' 
+    //   });
+    // }
+    // if (updateData.endTime && !timeRegex.test(updateData.endTime)) {
+    //   return res.status(400).json({ 
+    //     message: 'End time format should be HH:MM (24-hour format)' 
+    //   });
+    // }
 
-    const result = await timePeriodService.updateTimePeriod(id, updateData);
+    const result = await timePeriodService.updateTimePeriod(req, res);
     res.json({
       message: 'Time period updated successfully',
       data: result

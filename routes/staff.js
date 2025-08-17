@@ -5,6 +5,7 @@ const staffController = require('../controllers/staffController');
 router.post('/', staffController.createStaff);
 router.put('/', staffController.updateStaff);
 router.get('/', staffController.getStaff);
+router.get('/activeTeachers', staffController.getActiveTeachers);
 router.delete('/:id', staffController.deleteStaff);
 
 

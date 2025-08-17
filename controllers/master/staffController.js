@@ -117,18 +117,18 @@ exports.deleteStaff = async (req, res) => {
 };
 
 // Get active teachers for dropdown
-exports.getActiveTeachers = async (req, res) => {
-  try {
-    const result = await staffService.getActiveTeachers();
-    res.json({
-      message: 'Active teachers retrieved successfully',
-      data: result,
-      count: result.length
-    });
-  } catch (error) {
-    console.error('Error fetching active teachers:', error);
-    res.status(500).json({ 
-      message: error.message || 'Server error while fetching active teachers' 
-    });
-  }
-};
+// exports.getActiveTeachers = async (req, res) => {
+//   try {
+//     const result = await staffService.getActiveTeachers();
+//     res.json({
+//       message: 'Active teachers retrieved successfully',
+//       data: result,
+//       count: result.length
+//     });
+//   } catch (error) {
+//     console.error('Error fetching active teachers:', error);
+//     res.status(500).json({ 
+//       message: error.message || 'Server error while fetching active teachers' 
+//     });
+//   }
+// };

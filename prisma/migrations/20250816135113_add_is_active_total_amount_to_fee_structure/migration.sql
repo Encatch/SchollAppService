@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `feeitem` ADD COLUMN `isActive` BOOLEAN NOT NULL DEFAULT true,
+    ADD COLUMN `totalAmount` DOUBLE NOT NULL DEFAULT 0;

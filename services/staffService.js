@@ -33,8 +33,11 @@ const createStaff = async (data) => {
         timePeriods: true,
       }
     });
+    console.log("Staff created successfully:", staff);
+   
     return { status: 'success', message: 'Staff created successfully', staff_id: staff.id, staff };
   } catch (err) {
+    console.log("Staff un", err);
     return { status: 'fail', message: err.message };
   }
 };
@@ -138,9 +141,30 @@ const deleteStaff = async (id) => {
   }
 };
 
+const getActiveTeachers = async () => {
+  try {
+    const teachers = await prisma.staff.findMany({
+      where: { 
+        isActive: true,
+        staffType:{
+          id: 14 // Assuming 14 is the ID for teachers
+        }
+      },
+      orderBy: {
+        firstName: 'asc'
+      }
+    });
+    return teachers;
+  } catch (error) {
+    throw new Error(`Error fetching teachers: ${error.message}`);
+  }
+};
+
+
 module.exports = {
   createStaff,
   updateStaff,
   getStaff,
   deleteStaff,
+  getActiveTeachers
 }; 

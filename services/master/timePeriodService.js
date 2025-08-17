@@ -2,40 +2,38 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // Create a new time period
-exports.createTimePeriod = async (timePeriodData) => {
+exports.createTimePeriod = async (req, res) => {
   try {
     // Validate teacher exists
-    const teacher = await prisma.staff.findUnique({
-      where: { id: parseInt(timePeriodData.teacherId) }
-    });
-    
-    if (!teacher) {
-      throw new Error('Assigned teacher not found');
-    }
+    const {
+      periodName,
+      subjectId,
+      classId,
+      sectionId,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      teacherId,
+      isActive
+    } = req.body;
 
-    const timePeriod = await prisma.timePeriod.create({
+    const newPeriod = await prisma.timePeriod.create({
       data: {
-        periodName: timePeriodData.periodName,
-        subject: timePeriodData.subject,
-        startDate: new Date(timePeriodData.startDate),
-        endDate: new Date(timePeriodData.endDate),
-        startTime: timePeriodData.startTime,
-        endTime: timePeriodData.endTime,
-        teacherId: parseInt(timePeriodData.teacherId),
-        isActive: timePeriodData.isActive !== undefined ? timePeriodData.isActive : true
-      },
-      include: {
-        assignedTeacher: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            designation: true
-          }
-        }
+        periodName,
+        subjectId,
+        classId,
+        sectionId,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        startTime,
+        endTime,
+        teacherId,
+        isActive
       }
     });
-    return timePeriod;
+
+    res.status(201).json(newPeriod);
   } catch (error) {
     throw new Error(`Error creating time period: ${error.message}`);
   }
@@ -119,50 +117,42 @@ exports.getTimePeriodById = async (id) => {
 };
 
 // Update time period
-exports.updateTimePeriod = async (id, updateData) => {
+exports.updateTimePeriod = async (req, res) => {
   try {
-    const existingTimePeriod = await prisma.timePeriod.findUnique({
-      where: { id: parseInt(id) }
-    });
-    
-    if (!existingTimePeriod) {
-      throw new Error('Time period not found');
-    }
+    console.log('Update Time Period Request:', req.body);
+    const { id } = req.body;
+    const {
+      periodName,
+      subjectId,
+      classId,
+      sectionId,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
+      teacherId,
+      isActive
+    } = req.body;
 
-    // Validate teacher if teacherId is being updated
-    if (updateData.teacherId) {
-      const teacher = await prisma.staff.findUnique({
-        where: { id: parseInt(updateData.teacherId) }
-      });
-      
-      if (!teacher) {
-        throw new Error('Assigned teacher not found');
-      }
-    }
-
-    const updatedTimePeriod = await prisma.timePeriod.update({
+    const updatedPeriod = await prisma.timePeriod.update({
       where: { id: parseInt(id) },
       data: {
-        ...updateData,
-        startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
-        endDate: updateData.endDate ? new Date(updateData.endDate) : undefined,
-        teacherId: updateData.teacherId ? parseInt(updateData.teacherId) : undefined
-      },
-      include: {
-        assignedTeacher: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            designation: true
-          }
-        }
+        periodName,
+        subjectId,
+        classId,
+        sectionId,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        startTime,
+        endTime,
+        teacherId,
+        isActive
       }
     });
-    
-    return updatedTimePeriod;
+    res.status(201).json(updatedPeriod);
   } catch (error) {
-    throw new Error(`Error updating time period: ${error.message}`);
+    console.error(error);
+    res.status(500).json({ error: 'Something went wrong' });
   }
 };
 

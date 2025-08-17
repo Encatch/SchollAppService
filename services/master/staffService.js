@@ -42,7 +42,8 @@ exports.createStaff = async (staffData) => {
         username,
         hashedPassword,
         salary,
-        isTransportRequired
+        isTransportRequired,
+        isActive
       },
       include: {
         gender: true,
@@ -179,16 +180,7 @@ exports.getActiveTeachers = async () => {
     const teachers = await prisma.staff.findMany({
       where: { 
         isActive: true,
-        designation: {
-          contains: 'teacher',
-          mode: 'insensitive'
-        }
-      },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        designation: true
+        staffType:14
       },
       orderBy: {
         firstName: 'asc'
